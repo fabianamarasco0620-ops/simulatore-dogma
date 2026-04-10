@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indagine su mutazioni genetiche</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#dbe3ef;
+      --primary:#2f6fed;
+      --primary-dark:#2457bb;
+      --soft-blue:#eef4ff;
+      --soft-green:#e8f7ea;
+      --green:#1f7a38;
+      --soft-red:#fdeaea;
+      --red:#b42318;
+      --pill:#eef2ff;
+      --shadow:0 6px 22px rgba(25,42,70,.08);
+      --radius:22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      padding:20px;
+    }
+
+    .app{
+      max-width:960px;
+      margin:0 auto;
+    }
+
+    .hero, .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:18px;
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:2rem;
+      line-height:1.1;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.5;
+    }
+
+    .step-badge{
+      display:inline-block;
+      background:var(--soft-blue);
+      color:var(--primary);
+      font-weight:700;
+      padding:7px 12px;
+      border-radius:999px;
+      margin-bottom:12px;
+      font-size:.92rem;
+    }
+
+    h2{
+      margin:0 0 14px;
+      font-size:1.45rem;
+    }
+
+    p{
+      line-height:1.5;
+      margin:8px 0;
+    }
+
+    .seq-label{
+      margin:8px 0 8px;
+      font-weight:700;
+    }
+
+    .seq{
+      display:block;
+      width:100%;
+      background:#f8fbff;
+      border:2px solid #dbe8ff;
+      color:#334155;
+      border-radius:18px;
+      padding:16px 18px;
+      font-family:"Courier New", monospace;
+      font-size:1.25rem;
+      letter-spacing:1px;
+      overflow:auto;
+      white-space:nowrap;
+    }
+
+    .input-row{
+      margin-top:14px;
+    }
+
+    input[type="text"], select{
+      width:100%;
+      padding:14px 16px;
+      border-radius:16px;
+      border:2px solid var(--line);
+      background:#fff;
+      font-size:1rem;
+      color:var(--text);
+      outline:none;
+    }
+
+    input[type="text"]:focus, select:focus{
+      border-color:#b9ccff;
+      box-shadow:0 0 0 4px rgba(47,111,237,.08);
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      background:var(--primary);
+      color:#fff;
+      padding:14px 22px;
+      border-radius:18px;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:14px;
+      box-shadow:0 6px 14px rgba(47,111,237,.18);
+    }
+
+    .btn:hover{
+      background:var(--primary-dark);
+    }
+
+    .feedback{
+      margin-top:14px;
+      border-radius:18px;
+      padding:16px 18px;
+      font-size:1rem;
+      line-height:1.5;
+      border:1px solid transparent;
+    }
+
+    .ok{
+      background:var(--soft-green);
+      color:var(--green);
+      border-color:#bee3c3;
+    }
+
+    .err{
+      background:var(--soft-red);
+      color:var(--red);
+      border-color:#f1c1bc;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      border-radius:18px;
+      overflow:hidden;
+      border:2px solid var(--line);
+      background:#fff;
+    }
+
+    th, td{
+      border-bottom:1px solid var(--line);
+      border-right:1px solid var(--line);
+      padding:14px 12px;
+      text-align:center;
+      vertical-align:middle;
+    }
+
+    th:last-child, td:last-child{
+      border-right:none;
+    }
+
+    tr:last-child td{
+      border-bottom:none;
+    }
+
+    th{
+      background:#f8fbff;
+      font-size:1.05rem;
+    }
+
+    .codon{
+      font-weight:700;
+      font-size:1.2rem;
+      letter-spacing:1px;
+    }
+
+    .protein-box{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .pill{
+      background:var(--pill);
+      border:2px solid #d7defc;
+      color:#26324b;
+      border-radius:999px;
+      padding:10px 18px;
+      font-weight:700;
+      font-size:1rem;
+      min-width:72px;
+      text-align:center;
+    }
+
+    .two-col{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      margin-top:10px;
+    }
+
+    .mini-card{
+      background:#fafcff;
+      border:2px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .mini-card h3{
+      margin:0 0 8px;
+      font-size:1rem;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:.94rem;
+      margin-top:8px;
+    }
+
+    .big{
+      font-size:1.25rem;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    @media (max-width:700px){
+      body{ padding:14px; }
+      .hero h1{ font-size:1.7rem; }
+      .two-col{ grid-template-columns:1fr; }
+      .seq{ font-size:1.05rem; }
+      th, td{ padding:10px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <section class="hero">
+      <h1>Indagine su mutazioni genetiche</h1>
+      <p>
+        Scegli una sequenza di DNA, ricostruisci il percorso DNA → mRNA → proteina
+        e scopri quale tipo di mutazione è coinvolto.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Selezione caso</div>
+      <h2>Scegli il DNA da analizzare</h2>
+      <select id="caseSelect" onchange="changeCase()">
+        <option value="sickle">Caso 1 — Sequenza A</option>
+        <option value="silent">Caso 2 — Sequenza B</option>
+        <option value="cf">Caso 3 — Sequenza C</option>
+        <option value="thal">Caso 4 — Sequenza D</option>
+      </select>
+      <p class="small-note">
+        Ogni sequenza porta a un caso diverso. La patologia o il tipo di esito verranno rivelati solo alla fine.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Fase 1 — Trascrizione</div>
+      <h2>Costruisci l’mRNA</h2>
+
+      <div class="seq-label">DNA stampo:</div>
+      <div class="seq" id="dnaNormal"></div>
+
+      <div class="input-row">
+        <label for="mrnaInput"><strong>Scrivi l'mRNA corretto:</strong></label>
+        <input id="mrnaInput" type="text" placeholder="Scrivi qui la sequenza di mRNA">
+      </div>
+
+      <button class="btn" onclick="checkMRNA()">Verifica</button>
+      <div id="fb1"></div>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Fase 2 — Traduzione</div>
+      <h2>Costruisci la proteina</h2>
+
+      <div class="seq-label">mRNA:</div>
+      <div class="seq" id="mrnaDisplay"></div>
+
+      <p>Per ogni codone scegli l’anticodone del tRNA e l’amminoacido.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Codone</th>
+            <th>Anticodone</th>
+            <th>Amminoacido</th>
+          </tr>
+        </thead>
+        <tbody id="translationTable"></tbody>
+      </table>
+
+      <button class="btn" onclick="checkTraduzione()">Costruisci proteina</button>
+      <div id="fb2"></div>
+
+      <div class="protein-box" id="proteinPills"></div>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Fase 3 — Confronto</div>
+      <h2>Analizza la mutazione</h2>
+
+      <div class="two-col">
+        <div class="mini-card">
+          <h3>Sequenza originale</h3>
+          <div class="seq" id="dnaOriginalCompare"></div>
+        </div>
+
+        <div class="mini-card">
+          <h3>Sequenza mutata</h3>
+          <div class="seq" id="dnaMutatedCompare"></div>
+        </div>
+      </div>
+
+      <div class="input-row">
+        <label for="tipo"><strong>Che tipo di mutazione è?</strong></label>
+        <select id="tipo">
+          <option value="">Scegli</option>
+          <option>Silente</option>
+          <option>Missenso</option>
+          <option>Non senso</option>
+          <option>Frameshift</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="checkTipo()">Verifica</button>
+      <div id="fb3"></div>
+
+      <div class="seq-label" style="margin-top:16px;">Proteina mutata:</div>
+      <div class="seq" id="mutProteinDisplay"></div>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Fase 4 — Effetto</div>
+      <h2>Interpreta la conseguenza biologica</h2>
+
+      <div class="input-row">
+        <label for="effetto"><strong>Cosa comporta questa mutazione?</strong></label>
+        <select id="effetto">
+          <option value="">Scegli</option>
+          <option>Nessun cambiamento nella proteina</option>
+          <option>Proteina con funzione alterata</option>
+          <option>Proteina troncata</option>
+          <option>Alterazione della cornice di lettura e della proteina</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="checkFinale()">Verifica</button>
+      <div id="finale"></div>
+
+      <p class="small-note">
+        Nota: alcuni casi sono modelli semplificati costruiti per uso didattico.
+      </p>
+    </section>
+
+  </div>
+
+  <script>
+    const cases = {
+      sickle: {
+        label: "Caso 1 — Sequenza A",
+        normalDNA: "TAC CAC CTC AAA ACT",
+        normalMRNA: "AUG GUG GAG UUU UGA",
+        codons: ["AUG", "GUG", "GAG", "UUU"],
+        anticodons: ["UAC", "CAC", "CUC", "AAA"],
+        amino: ["Met", "Val", "Glu", "Phe"],
+        fullProtein: ["Met", "Val", "Glu", "Phe", "STOP"],
+
+        mutatedDNA: "TAC CAC CAC AAA ACT",
+        mutatedMRNA: "AUG GUG GUG UUU UGA",
+        mutatedProtein: ["Met", "Val", "Val", "Phe", "STOP"],
+
+        mutationType: "Missenso",
+        effect: "Proteina con funzione alterata",
+        revealTitle: "Si tratta di anemia falciforme.",
+        revealText: "Una mutazione missenso cambia un amminoacido della proteina. In questo modello didattico l’emoglobina risulta alterata nella sua funzione."
+      },
+
+      silent: {
+        label: "Caso 2 — Sequenza B",
+        normalDNA: "TAC AAA TTT ACT",
+        normalMRNA: "AUG UUU AAA UGA",
+        codons: ["AUG", "UUU", "AAA"],
+        anticodons: ["UAC", "AAA", "UUU"],
+        amino: ["Met", "Phe", "Lys"],
+        fullProtein: ["Met", "Phe", "Lys", "STOP"],
+
+        mutatedDNA: "TAC AAG TTT ACT",
+        mutatedMRNA: "AUG UUC AAA UGA",
+        mutatedProtein: ["Met", "Phe", "Lys", "STOP"],
+
+        mutationType: "Silente",
+        effect: "Nessun cambiamento nella proteina",
+        revealTitle: "Si tratta di una mutazione silente.",
+        revealText: "La sequenza cambia, ma il codone mutato codifica comunque per lo stesso amminoacido. Nel modello la proteina non cambia."
+      },
+
+      cf: {
+        label: "Caso 3 — Sequenza C",
+        normalDNA: "TAC AAA CAA GGA ACT",
+        normalMRNA: "AUG UUU GUU CCU UGA",
+        codons: ["AUG", "UUU", "GUU", "CCU"],
+        anticodons: ["UAC", "AAA", "CAA", "GGA"],
+        amino: ["Met", "Phe", "Val", "Pro"],
+        fullProtein: ["Met", "Phe", "Val", "Pro", "STOP"],
+
+        mutatedDNA: "TAC ATT CAA GGA ACT",
+        mutatedMRNA: "AUG UAA GUU CCU UGA",
+        mutatedProtein: ["Met", "STOP"],
+
+        mutationType: "Non senso",
+        effect: "Proteina troncata",
+        revealTitle: "Si tratta di un modello di fibrosi cistica da mutazione non senso.",
+        revealText: "La mutazione introduce uno STOP prematuro e produce una proteina tronca. Qui il caso è semplificato a scopo didattico."
+      },
+
+      thal: {
+        label: "Caso 4 — Sequenza D",
+        normalDNA: "TAC GAA CCT GGA ACT",
+        normalMRNA: "AUG CUU GGA CCU UGA",
+        codons: ["AUG", "CUU", "GGA", "CCU"],
+        anticodons: ["UAC", "GAA", "CCU", "GGA"],
+        amino: ["Met", "Leu", "Gly", "Pro"],
+        fullProtein: ["Met", "Leu", "Gly", "Pro", "STOP"],
+
+        mutatedDNA: "TAC GAC CTG GAA CT",
+        mutatedMRNA: "AUG CUG GAC CUU GA",
+        mutatedProtein: ["Met", "Leu", "Asp", "Leu", "?"],
+
+        mutationType: "Frameshift",
+        effect: "Alterazione della cornice di lettura e della proteina",
+        revealTitle: "Si tratta di un modello di talassemia da frameshift.",
+        revealText: "La perdita di una base sposta la cornice di lettura e modifica tutti i codoni successivi. Anche questo è un modello semplificato per uso didattico."
+      }
+    };
+
+    let currentCaseKey = "sickle";
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function norm(x) {
+      return x.toUpperCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function mRNAWithoutStop(fullMRNA) {
+      const parts = fullMRNA.split(" ");
+      return parts.slice(0, -1).join(" ");
+    }
+
+    function proteinToText(proteinArr) {
+      return proteinArr.join(" – ");
+    }
+
+    function clearFeedbacks() {
+      document.getElementById("fb1").innerHTML = "";
+      document.getElementById("fb2").innerHTML = "";
+      document.getElementById("fb3").innerHTML = "";
+      document.getElementById("finale").innerHTML = "";
+      document.getElementById("mrnaInput").value = "";
+      document.getElementById("tipo").value = "";
+      document.getElementById("effetto").value = "";
+    }
+
+    function createOptions(correctValue, pool) {
+      const uniquePool = Array.from(new Set(pool));
+      const options = shuffle(uniquePool);
+      return options.map(item => `<option value="${item}">${item}</option>`).join("");
+    }
+
+    function renderTranslationTable() {
+      const data = cases[currentCaseKey];
+      const tbody = document.getElementById("translationTable");
+      tbody.innerHTML = "";
+
+      const anticodonPool = data.anticodons;
+      const aminoPool = data.amino;
+
+      data.codons.forEach((codon, index) => {
+        const antiCorrect = data.anticodons[index];
+        const aaCorrect = data.amino[index];
+
+        const row = `
+          <tr>
+            <td class="codon">${codon}</td>
+            <td>
+              <select id="anti${index}">
+                <option value="">Scegli</option>
+                ${createOptions(antiCorrect, anticodonPool)}
+              </select>
+            </td>
+            <td>
+              <select id="aa${index}">
+                <option value="">Scegli</option>
+                ${createOptions(aaCorrect, aminoPool)}
+              </select>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function renderProteinPills() {
+      const data = cases[currentCaseKey];
+      const box = document.getElementById("proteinPills");
+      box.innerHTML = "";
+      data.fullProtein.forEach(aa => {
+        box.innerHTML += `<div class="pill">${aa}</div>`;
+      });
+    }
+
+    function changeCase() {
+      currentCaseKey = document.getElementById("caseSelect").value;
+      const data = cases[currentCaseKey];
+
+      document.getElementById("dnaNormal").textContent = data.normalDNA;
+      document.getElementById("mrnaDisplay").textContent = mRNAWithoutStop(data.normalMRNA);
+      document.getElementById("dnaOriginalCompare").textContent = data.normalDNA;
+      document.getElementById("dnaMutatedCompare").textContent = data.mutatedDNA;
+      document.getElementById("mutProteinDisplay").textContent = proteinToText(data.mutatedProtein);
+
+      renderTranslationTable();
+      renderProteinPills();
+      clearFeedbacks();
+    }
+
+    function checkMRNA() {
+      const data = cases[currentCaseKey];
+      const val = norm(document.getElementById("mrnaInput").value);
+      const correct = data.normalMRNA;
+      const fb1 = document.getElementById("fb1");
+
+      if (val === correct) {
+        fb1.innerHTML = `<div class="feedback ok">✔ Trascrizione corretta!</div>`;
+      } else {
+        fb1.innerHTML = `<div class="feedback err">Non corretto. Riprova controllando la complementarità tra basi durante la trascrizione.</div>`;
+      }
+    }
+
+    function checkTraduzione() {
+      const data = cases[currentCaseKey];
+      let correct = true;
+
+      for (let i = 0; i < data.codons.length; i++) {
+        const anti = document.getElementById(`anti${i}`).value;
+        const aa = document.getElementById(`aa${i}`).value;
+
+        if (anti !== data.anticodons[i] || aa !== data.amino[i]) {
+          correct = false;
+          break;
+        }
+      }
+
+      const fb2 = document.getElementById("fb2");
+      if (correct) {
+        fb2.innerHTML = `<div class="feedback ok">✔ Traduzione corretta: i tRNA sono associati bene e la proteina costruita è corretta.</div>`;
+      } else {
+        fb2.innerHTML = `<div class="feedback err">C’è qualche errore nell’associazione tra codone, anticodone e amminoacido.</div>`;
+      }
+    }
+
+    function checkTipo() {
+      const data = cases[currentCaseKey];
+      const val = document.getElementById("tipo").value;
+      const fb3 = document.getElementById("fb3");
+
+      if (val === data.mutationType) {
+        fb3.innerHTML = `<div class="feedback ok">✔ Corretto! Hai identificato il tipo di mutazione.</div>`;
+      } else {
+        fb3.innerHTML = `<div class="feedback err">Non corretto. Confronta con attenzione la sequenza mutata e la proteina risultante.</div>`;
+      }
+    }
+
+    function checkFinale() {
+      const data = cases[currentCaseKey];
+      const tipo = document.getElementById("tipo").value;
+      const effetto = document.getElementById("effetto").value;
+      const finale = document.getElementById("finale");
+
+      if (tipo === data.mutationType && effetto === data.effect) {
+        finale.innerHTML = `
+          <div class="feedback ok">
+            <div class="big">🎉 Ottimo lavoro!</div>
+            <strong>${data.revealTitle}</strong><br><br>
+            ${data.revealText}
+          </div>
+        `;
+      } else {
+        finale.innerHTML = `<div class="feedback err">Non corretto. Rivedi il tipo di mutazione e il suo effetto sulla proteina.</div>`;
+      }
+    }
+
+    changeCase();
+  </script>
+</body>
+</html>
