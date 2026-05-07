@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dal DNA alla proteina</title>
+  <style>
+    :root{
+      --bg1:#f4fbf8;
+      --bg2:#eef6ff;
+      --card:#ffffffee;
+      --text:#1f2937;
+      --muted:#667085;
+      --line:#d6e2f3;
+      --primary:#356fe8;
+      --primary-dark:#2457bb;
+      --soft-blue:#edf4ff;
+      --soft-green:#e8f8eb;
+      --soft-red:#fdecec;
+      --green:#1f7a38;
+      --red:#b42318;
+      --pill:#eef2ff;
+      --shadow:0 8px 24px rgba(33, 52, 84, 0.10);
+      --radius:24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(116, 214, 164, 0.18), transparent 18%),
+        radial-gradient(circle at 85% 15%, rgba(53, 111, 232, 0.14), transparent 20%),
+        radial-gradient(circle at 80% 80%, rgba(116, 214, 164, 0.16), transparent 20%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding: 20px;
+      overflow-x:hidden;
+      position: relative;
+    }
+
+    .bio-bg{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .dna{
+      position:absolute;
+      opacity:.08;
+      font-size: 40px;
+      animation: floaty 18s linear infinite;
+      user-select: none;
+    }
+
+    .dna:nth-child(1){ left:4%; top:8%; animation-duration:22s; }
+    .dna:nth-child(2){ right:6%; top:14%; animation-duration:19s; }
+    .dna:nth-child(3){ left:10%; bottom:14%; animation-duration:24s; }
+    .dna:nth-child(4){ right:10%; bottom:10%; animation-duration:20s; }
+    .dna:nth-child(5){ left:46%; top:4%; animation-duration:26s; }
+
+    @keyframes floaty{
+      0%   { transform: translateY(0) rotate(0deg); }
+      50%  { transform: translateY(-18px) rotate(6deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    .app{
+      max-width: 980px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero, .card{
+      background: var(--card);
+      backdrop-filter: blur(6px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,.45);
+    }
+
+    .hero h1{
+      margin:0 0 10px;
+      font-size: 2rem;
+      line-height:1.1;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size: 1rem;
+    }
+
+    .step-badge{
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:999px;
+      background:var(--soft-blue);
+      color:var(--primary);
+      font-weight:700;
+      font-size:.92rem;
+      margin-bottom:12px;
+    }
+
+    h2{
+      margin:0 0 14px;
+      font-size:1.6rem;
+    }
+
+    p{
+      margin:8px 0;
+      line-height:1.5;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:.95rem;
+    }
+
+    .seq-label{
+      margin:10px 0 8px;
+      font-weight:700;
+    }
+
+    .seq{
+      display:block;
+      width:100%;
+      background:#f8fbff;
+      border:3px solid #d9e6fb;
+      border-radius:22px;
+      padding:18px 18px;
+      font-family:"Courier New", monospace;
+      font-size:1.25rem;
+      color:#334155;
+      letter-spacing:1px;
+      overflow:auto;
+      white-space:nowrap;
+    }
+
+    .input-row{
+      margin-top:16px;
+    }
+
+    input[type="text"], select{
+      width:100%;
+      padding:14px 16px;
+      border-radius:18px;
+      border:3px solid var(--line);
+      background:#fff;
+      font-size:1rem;
+      color:var(--text);
+      outline:none;
+    }
+
+    input[type="text"]:focus, select:focus{
+      border-color:#bfd0ff;
+      box-shadow:0 0 0 4px rgba(53,111,232,.08);
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      background:var(--primary);
+      color:#fff;
+      padding:16px 26px;
+      border-radius:22px;
+      font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:16px;
+      box-shadow:0 7px 16px rgba(53,111,232,.20);
+    }
+
+    .btn:hover{
+      background:var(--primary-dark);
+    }
+
+    .feedback{
+      margin-top:16px;
+      border-radius:18px;
+      padding:16px 18px;
+      border:1px solid transparent;
+      font-size:1rem;
+      line-height:1.55;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ok{
+      background:var(--soft-green);
+      color:var(--green);
+      border-color:#bfe5c7;
+    }
+
+    .err{
+      background:var(--soft-red);
+      color:var(--red);
+      border-color:#efc2be;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      border-radius:20px;
+      overflow:hidden;
+      border:3px solid var(--line);
+      background:#fff;
+    }
+
+    th, td{
+      border-bottom:1px solid var(--line);
+      border-right:1px solid var(--line);
+      padding:14px 12px;
+      text-align:center;
+      vertical-align:middle;
+    }
+
+    th:last-child, td:last-child{ border-right:none; }
+    tr:last-child td{ border-bottom:none; }
+
+    th{
+      background:#f4f8ff;
+      font-size:1rem;
+    }
+
+    .codon{
+      font-weight:700;
+      font-size:1.1rem;
+      letter-spacing:1px;
+    }
+
+    .protein-box{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .pill{
+      background:var(--pill);
+      border:3px solid #d8e1ff;
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:700;
+      font-size:1rem;
+      min-width:80px;
+      text-align:center;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .celebrate{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    .emoji-burst{
+      position:absolute;
+      font-size:28px;
+      animation: burst 2.2s ease-out forwards;
+      opacity:0;
+    }
+
+    @keyframes burst{
+      0%   { transform: translateY(0) scale(.6) rotate(0deg); opacity:0; }
+      15%  { opacity:1; }
+      100% { transform: translateY(-120px) scale(1.2) rotate(18deg); opacity:0; }
+    }
+
+    .shake{
+      animation: shake .35s linear 1;
+    }
+
+    @keyframes shake{
+      0%{ transform:translateX(0); }
+      25%{ transform:translateX(-4px); }
+      50%{ transform:translateX(4px); }
+      75%{ transform:translateX(-4px); }
+      100%{ transform:translateX(0); }
+    }
+
+    @media (max-width:700px){
+      body{ padding:14px; }
+      .hero h1{ font-size:1.65rem; }
+      .seq{ font-size:1.05rem; }
+      th, td{ padding:10px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bio-bg" aria-hidden="true">
+    <div class="dna">🧬</div>
+    <div class="dna">🧫</div>
+    <div class="dna">🔬</div>
+    <div class="dna">🧪</div>
+    <div class="dna">🧬</div>
+  </div>
+
+  <div class="app">
+    <section class="hero">
+      <h1>Dal DNA alla proteina</h1>
+      <p>
+        Scegli una sequenza di DNA, trascrivila in mRNA e poi costruisci la proteina
+        selezionando anticodoni e amminoacidi corretti.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="step-badge">Selezione sequenza</div>
+      <h2>Scegli il DNA da analizzare</h2>
+      <select id="caseSelect" onchange="changeCase()">
+        <option value="sickle">Sequenza A</option>
+        <option value="silent">Sequenza B</option>
+        <option value="cf">Sequenza C</option>
+        <option value="thal">Sequenza D</option>
+      </select>
+      <p class="small-note">
+        Ogni sequenza genera un esercizio diverso, ma l’attività si ferma alla sintesi della proteina.
+      </p>
+    </section>
+
+    <section class="card" id="step1Card">
+      <div class="step-badge">Fase 1 — Trascrizione</div>
+      <h2>Costruisci l’mRNA</h2>
+
+      <div class="seq-label">DNA stampo:</div>
+      <div class="seq" id="dnaNormal"></div>
+
+      <div class="input-row">
+        <label for="mrnaInput"><strong>Scrivi l'mRNA corretto:</strong></label>
+        <input id="mrnaInput" type="text" placeholder="Scrivi qui la sequenza di mRNA">
+      </div>
+
+      <button class="btn" onclick="checkMRNA()">Verifica</button>
+      <div id="fb1"></div>
+    </section>
+
+    <section class="card" id="step2Card">
+      <div class="step-badge">Fase 2 — Traduzione</div>
+      <h2>Costruisci la proteina</h2>
+
+      <div class="seq-label">mRNA:</div>
+      <div class="seq" id="mrnaDisplay"></div>
+
+      <p>Per ogni codone scegli l’anticodone del tRNA e l’amminoacido.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Codone</th>
+            <th>Anticodone</th>
+            <th>Amminoacido</th>
+          </tr>
+        </thead>
+        <tbody id="translationTable"></tbody>
+      </table>
+
+      <button class="btn" onclick="checkTraduzione()">Costruisci proteina</button>
+      <div id="fb2"></div>
+
+      <div class="protein-box" id="proteinPills"></div>
+    </section>
+  </div>
+
+  <script>
+    const cases = {
+      sickle: {
+        normalDNA: "TAC CAC CTC AAA ACT",
+        normalMRNA: "AUG GUG GAG UUU UGA",
+        codons: ["AUG", "GUG", "GAG", "UUU"],
+        anticodons: ["UAC", "CAC", "CUC", "AAA"],
+        amino: ["Met", "Val", "Glu", "Phe"],
+        fullProtein: ["Met", "Val", "Glu", "Phe", "STOP"]
+      },
+      silent: {
+        normalDNA: "TAC AAA TTT ACT",
+        normalMRNA: "AUG UUU AAA UGA",
+        codons: ["AUG", "UUU", "AAA"],
+        anticodons: ["UAC", "AAA", "UUU"],
+        amino: ["Met", "Phe", "Lys"],
+        fullProtein: ["Met", "Phe", "Lys", "STOP"]
+      },
+      cf: {
+        normalDNA: "TAC AAA CAA GGA ACT",
+        normalMRNA: "AUG UUU GUU CCU UGA",
+        codons: ["AUG", "UUU", "GUU", "CCU"],
+        anticodons: ["UAC", "AAA", "CAA", "GGA"],
+        amino: ["Met", "Phe", "Val", "Pro"],
+        fullProtein: ["Met", "Phe", "Val", "Pro", "STOP"]
+      },
+      thal: {
+        normalDNA: "TAC GAA CCT GGA ACT",
+        normalMRNA: "AUG CUU GGA CCU UGA",
+        codons: ["AUG", "CUU", "GGA", "CCU"],
+        anticodons: ["UAC", "GAA", "CCU", "GGA"],
+        amino: ["Met", "Leu", "Gly", "Pro"],
+        fullProtein: ["Met", "Leu", "Gly", "Pro", "STOP"]
+      }
+    };
+
+    let currentCaseKey = "sickle";
+    let successStyleIndex = 0;
+    const successSets = [
+      ["🎉","🎉","🎉","🪩","🕺","🎉"],
+      ["🧬","🎉","🧬","🎊","🧪","🎉"],
+      ["🕺","🪩","🎉","🎊","🕺","🪩"]
+    ];
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function norm(x) {
+      return x.toUpperCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function mRNAWithoutStop(fullMRNA) {
+      const parts = fullMRNA.split(" ");
+      return parts.slice(0, -1).join(" ");
+    }
+
+    function renderProteinPills() {
+      const data = cases[currentCaseKey];
+      const box = document.getElementById("proteinPills");
+      box.innerHTML = "";
+      data.fullProtein.forEach(aa => {
+        box.innerHTML += `<div class="pill">${aa}</div>`;
+      });
+    }
+
+    function clearFeedbacks() {
+      document.getElementById("fb1").innerHTML = "";
+      document.getElementById("fb2").innerHTML = "";
+      document.getElementById("mrnaInput").value = "";
+    }
+
+    function createOptions(pool) {
+      const uniquePool = Array.from(new Set(pool));
+      const options = shuffle(uniquePool);
+      return options.map(item => `<option value="${item}">${item}</option>`).join("");
+    }
+
+    function renderTranslationTable() {
+      const data = cases[currentCaseKey];
+      const tbody = document.getElementById("translationTable");
+      tbody.innerHTML = "";
+
+      const anticodonPool = data.anticodons;
+      const aminoPool = data.amino;
+
+      data.codons.forEach((codon, index) => {
+        const row = `
+          <tr>
+            <td class="codon">${codon}</td>
+            <td>
+              <select id="anti${index}">
+                <option value="">Scegli</option>
+                ${createOptions(anticodonPool)}
+              </select>
+            </td>
+            <td>
+              <select id="aa${index}">
+                <option value="">Scegli</option>
+                ${createOptions(aminoPool)}
+              </select>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function changeCase() {
+      currentCaseKey = document.getElementById("caseSelect").value;
+      const data = cases[currentCaseKey];
+
+      document.getElementById("dnaNormal").textContent = data.normalDNA;
+      document.getElementById("mrnaDisplay").textContent = mRNAWithoutStop(data.normalMRNA);
+
+      renderTranslationTable();
+      renderProteinPills();
+      clearFeedbacks();
+    }
+
+    function burst(container, good=true) {
+      const host = document.createElement("div");
+      host.className = "celebrate";
+      container.appendChild(host);
+
+      const symbols = good
+        ? successSets[successStyleIndex % successSets.length]
+        : ["⚠️","👀","⚠️","👀","⚠️"];
+
+      const count = good ? 8 : 5;
+
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement("div");
+        el.className = "emoji-burst";
+        el.textContent = symbols[i % symbols.length];
+        el.style.left = (8 + Math.random() * 84) + "%";
+        el.style.bottom = (10 + Math.random() * 18) + "px";
+        el.style.animationDelay = (Math.random() * 0.25) + "s";
+        host.appendChild(el);
+      }
+
+      if (good) successStyleIndex++;
+      setTimeout(() => host.remove(), 2400);
+    }
+
+    function errorShake(cardId) {
+      const el = document.getElementById(cardId);
+      el.classList.remove("shake");
+      void el.offsetWidth;
+      el.classList.add("shake");
+    }
+
+    function checkMRNA() {
+      const data = cases[currentCaseKey];
+      const val = norm(document.getElementById("mrnaInput").value);
+      const correct = data.normalMRNA;
+      const fb1 = document.getElementById("fb1");
+      const card = document.getElementById("step1Card");
+
+      if (val === correct) {
+        fb1.innerHTML = `
+          <div class="feedback ok">
+            ✔ Trascrizione corretta! Hai costruito l’mRNA giusto. 🎉
+          </div>
+        `;
+        burst(card, true);
+      } else {
+        fb1.innerHTML = `
+          <div class="feedback err">
+            Non corretto. 👀⚠️ Controlla la complementarità tra basi durante la trascrizione.
+          </div>
+        `;
+        errorShake("step1Card");
+        burst(card, false);
+      }
+    }
+
+    function checkTraduzione() {
+      const data = cases[currentCaseKey];
+      let correct = true;
+
+      for (let i = 0; i < data.codons.length; i++) {
+        const anti = document.getElementById(`anti${i}`).value;
+        const aa = document.getElementById(`aa${i}`).value;
+
+        if (anti !== data.anticodons[i] || aa !== data.amino[i]) {
+          correct = false;
+          break;
+        }
+      }
+
+      const fb2 = document.getElementById("fb2");
+      const card = document.getElementById("step2Card");
+
+      if (correct) {
+        fb2.innerHTML = `
+          <div class="feedback ok">
+            ✔ Traduzione corretta! I tRNA sono associati bene e la proteina è stata sintetizzata correttamente. 🧬🎉
+          </div>
+        `;
+        burst(card, true);
+      } else {
+        fb2.innerHTML = `
+          <div class="feedback err">
+            C’è qualche errore nell’associazione tra codone, anticodone e amminoacido. 👀⚠️
+          </div>
+        `;
+        errorShake("step2Card");
+        burst(card, false);
+      }
+    }
+
+    changeCase();
+  </script>
+</body>
+</html>
